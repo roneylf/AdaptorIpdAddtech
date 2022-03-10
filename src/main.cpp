@@ -91,12 +91,20 @@ void loop()
       }
     }
   }
-  if (json.length > 10)
+  if (json.length() > 10)
   {
     if (deserializeJson(doc, json) == DeserializationError::Ok)
     {
-      pos = doc["POS"];
-      direcao = doc["DIR"];
+      if(doc.containsKey("POS")){
+        pos = doc["POS"];
+      }
+      if(doc.containsKey("DIRECAO")){
+        direcao = doc["DIRECAO"];
+      }
+      if(doc.containsKey("apagar")){
+        botao.apagarLed(doc["apagar"]);
+      }
+    
     }
   }
 
