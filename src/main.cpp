@@ -12,9 +12,15 @@
 #define LED_PIN 13
 DynamicJsonDocument doc(1024);
 
+struct BtLed
+{
+  bool is_on = false;
+  unsigned long tempo = 0;
+};
 ButtonPCF8574 botao;
 ButtonPCF8574 botao2;
 
+BtLed btleds[16] = {BtLed()};
 NeoSWSerial neo(15, 16);
 String json;
 
@@ -42,6 +48,8 @@ void ler()
 
   if (i > -1)
   {
+    btleds[i].is_on = true;
+    btleds[i].tempo = millis();
     a = i;
     i = 0;
   }
@@ -53,7 +61,7 @@ void ler()
     block = true;
   }
 
-  if (block && (millis() - tempo) > 5000)
+  if (block && (millis() - tempo) > 5000 && false)
   {
     block = false;
     if (a > 7)
@@ -129,6 +137,23 @@ int direcao = 0;
 
 void loop()
 {
+
+  for (size_t i = 0; i < 16; i++)
+  {
+    if (btleds[i].is_on && millis() - btleds[i].tempo > 120 * 1000)
+    {
+      btleds[i].is_on = false;
+      if (i > 7)
+      {
+        botao2.turnoff(i);
+      }
+      else
+      {
+        botao.turnoff(i);
+      }
+    }
+  }
+
   while (Serial.available())
   {
 
@@ -180,6 +205,7 @@ void loop()
       {
 
         botao.turnoff(doc["apagar"]);
+        btleds[(int)doc["apagar"]].is_on = false;
       }
     }
     doc.clear();
